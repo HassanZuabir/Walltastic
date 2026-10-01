@@ -61,6 +61,94 @@ class SettingsScreen extends GetView<SettingsController> {
                 ),
               ),
               const SizedBox(height: 28),
+              if (controller.autoChangeSupported) ...[
+                const _SectionTitle(
+                  icon: Icons.autorenew_rounded,
+                  title: 'Auto wallpaper',
+                ),
+                const SizedBox(height: 12),
+                Obx(
+                  () => _SettingsCard(
+                    children: [
+                      SwitchListTile(
+                        title: const Text('Change wallpaper automatically'),
+                        subtitle: const Text(
+                          'Picks a random wallpaper from your saved '
+                          'favorites on a schedule. Needs internet.',
+                        ),
+                        value: controller.autoChangeEnabled.value,
+                        onChanged: controller.isSaving.value
+                            ? null
+                            : controller.setAutoChangeEnabled,
+                      ),
+                      if (controller.autoChangeEnabled.value) ...[
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.schedule_rounded),
+                          title: const Text('Frequency'),
+                          trailing: DropdownButton<int>(
+                            value: controller.autoChangeHours.value,
+                            underline: const SizedBox.shrink(),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 6,
+                                child: Text('Every 6 hours'),
+                              ),
+                              DropdownMenuItem(
+                                value: 12,
+                                child: Text('Every 12 hours'),
+                              ),
+                              DropdownMenuItem(value: 24, child: Text('Daily')),
+                              DropdownMenuItem(
+                                value: 168,
+                                child: Text('Weekly'),
+                              ),
+                            ],
+                            onChanged: controller.isSaving.value
+                                ? null
+                                : (hours) {
+                                    if (hours != null) {
+                                      controller.setAutoChangeHours(hours);
+                                    }
+                                  },
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.wallpaper_rounded),
+                          title: const Text('Apply to'),
+                          trailing: DropdownButton<String>(
+                            value: controller.autoChangeTarget.value,
+                            underline: const SizedBox.shrink(),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'home',
+                                child: Text('Home screen'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'lock',
+                                child: Text('Lock screen'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'both',
+                                child: Text('Home and lock'),
+                              ),
+                            ],
+                            onChanged: controller.isSaving.value
+                                ? null
+                                : (target) {
+                                    if (target != null) {
+                                      controller.setAutoChangeTarget(target);
+                                    }
+                                  },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+              ],
               const _SectionTitle(
                 icon: Icons.storage_rounded,
                 title: 'Storage',

@@ -4,16 +4,57 @@ import android.app.WallpaperManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.FileInputStream
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "walltastic/auto_wallpaper",
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "schedule" -> {
+                    val hours = (call.argument<Int>("hours") ?: 24).coerceAtLeast(1)
+                    val target = call.argument<String>("target") ?: "both"
+                    val request = PeriodicWorkRequestBuilder<AutoWallpaperWorker>(
+                        hours.toLong(),
+                        TimeUnit.HOURS,
+                    )
+                        .setConstraints(
+                            Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build(),
+                        )
+                        .setInputData(workDataOf("target" to target))
+                        .build()
+                    WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                        "walltastic.autoWallpaper",
+                        ExistingPeriodicWorkPolicy.UPDATE,
+                        request,
+                    )
+                    result.success(true)
+                }
+                "cancel" -> {
+                    WorkManager.getInstance(this)
+                        .cancelUniqueWork("walltastic.autoWallpaper")
+                    result.success(true)
+                }
+                else -> result.notImplemented()
+            }
+        }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "walltastic/wallpaper")
             .setMethodCallHandler { call, result ->
                 if (call.method != "setWallpaper") {
