@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 /// create your ad units in the AdMob console and pass the real IDs with
 /// --dart-define (or replace the release values below).
 abstract final class AdConfig {
+  /// Master switch — set to false to hide all ads (e.g. for screenshots).
+  static const bool adsEnabled = true;
+
   static const _androidBannerTest = 'ca-app-pub-3940256099942544/6300978111';
   static const _iosBannerTest = 'ca-app-pub-3940256099942544/2934735716';
   static const _androidInterstitialTest =
@@ -16,12 +19,14 @@ abstract final class AdConfig {
 
   static const _androidBannerRelease = String.fromEnvironment(
     'ADMOB_ANDROID_BANNER_ID',
+    defaultValue: 'ca-app-pub-7328244770178820/5064995468',
   );
   static const _iosBannerRelease = String.fromEnvironment(
     'ADMOB_IOS_BANNER_ID',
   );
   static const _androidInterstitialRelease = String.fromEnvironment(
     'ADMOB_ANDROID_INTERSTITIAL_ID',
+    defaultValue: 'ca-app-pub-7328244770178820/7499587112',
   );
   static const _iosInterstitialRelease = String.fromEnvironment(
     'ADMOB_IOS_INTERSTITIAL_ID',

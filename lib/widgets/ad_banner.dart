@@ -30,6 +30,7 @@ class _AdBannerState extends State<AdBanner> {
   }
 
   Future<void> _load() async {
+    if (!AdConfig.adsEnabled) return;
     if (!Get.find<AdsController>().adsInitialized.value) {
       // Retry once the SDK is ready.
       ever(Get.find<AdsController>().adsInitialized, (ready) {

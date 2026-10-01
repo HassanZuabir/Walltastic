@@ -14,6 +14,7 @@ class AdsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (!AdConfig.adsEnabled) return;
     MobileAds.instance.initialize().then((_) {
       adsInitialized.value = true;
       _loadInterstitial();
@@ -40,6 +41,7 @@ class AdsController extends GetxController {
   /// Call when a wallpaper detail screen is opened. Shows an interstitial
   /// every [AdConfig.interstitialFrequency] opens, respecting the cooldown.
   void onWallpaperOpened() {
+    if (!AdConfig.adsEnabled) return;
     _detailOpens++;
     if (_detailOpens % AdConfig.interstitialFrequency != 0) return;
     final last = _lastInterstitialShown;
