@@ -20,7 +20,11 @@ Wallpaper _photo(int id, String title) => Wallpaper(
 
 class FakeWallpaperRepository extends WallpaperRepository {
   @override
-  Future<WallpaperPage> fetch({String query = '', int page = 1}) async =>
+  Future<WallpaperPage> fetch({
+    String query = '',
+    String color = '',
+    int page = 1,
+  }) async =>
       WallpaperPage(
         page > 1
             ? []

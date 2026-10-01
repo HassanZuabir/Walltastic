@@ -14,7 +14,11 @@ class ControlledRepository extends WallpaperRepository {
       <({String query, int page, Completer<WallpaperPage> result})>[];
 
   @override
-  Future<WallpaperPage> fetch({String query = '', int page = 1}) {
+  Future<WallpaperPage> fetch({
+    String query = '',
+    String color = '',
+    int page = 1,
+  }) {
     final result = Completer<WallpaperPage>();
     requests.add((query: query, page: page, result: result));
     return result.future;

@@ -19,7 +19,11 @@ class GalleryException implements Exception {
 }
 
 abstract class WallpaperRepository {
-  Future<WallpaperPage> fetch({String query = '', int page = 1});
+  Future<WallpaperPage> fetch({
+    String query = '',
+    String color = '',
+    int page = 1,
+  });
   void close() {}
 }
 
@@ -30,7 +34,11 @@ class PexelsWallpaperRepository extends WallpaperRepository {
   final String apiKey;
 
   @override
-  Future<WallpaperPage> fetch({String query = '', int page = 1}) async {
+  Future<WallpaperPage> fetch({
+    String query = '',
+    String color = '',
+    int page = 1,
+  }) async {
     if (apiKey.trim().isEmpty) {
       developer.log(
         'PEXELS_API_KEY is missing from the app configuration.',
@@ -40,7 +48,10 @@ class PexelsWallpaperRepository extends WallpaperRepository {
         'Wallpapers are temporarily unavailable. Please try again later.',
       );
     }
-    final search = query.trim();
+    var search = query.trim();
+    final tint = color.trim();
+    // The color filter only works on search, so fall back to a broad query.
+    if (search.isEmpty && tint.isNotEmpty) search = 'wallpaper';
     final uri = Uri.https(
       'api.pexels.com',
       search.isEmpty ? '/v1/curated' : '/v1/search',
@@ -48,6 +59,7 @@ class PexelsWallpaperRepository extends WallpaperRepository {
         'per_page': '24',
         'page': '$page',
         if (search.isNotEmpty) ...{'query': search, 'orientation': 'portrait'},
+        if (search.isNotEmpty && tint.isNotEmpty) 'color': tint,
       },
     );
     try {

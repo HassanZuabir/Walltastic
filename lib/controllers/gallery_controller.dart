@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../data/favorites_store.dart';
+import '../data/wallpaper_categories.dart';
 import '../data/wallpaper_repository.dart';
 import '../models/wallpaper.dart';
 
@@ -15,6 +16,7 @@ class GalleryController extends GetxController {
   final selectedTab = 0.obs;
   final query = ''.obs;
   final selectedCategory = 'All'.obs;
+  final selectedColor = ''.obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
   final hasMore = false.obs;
@@ -38,13 +40,31 @@ class GalleryController extends GetxController {
   Future<void> search(String value) {
     query.value = value.trim();
     selectedCategory.value = 'All';
+    selectedColor.value = '';
     selectedTab.value = 0;
     return load();
   }
 
   Future<void> selectCategory(String category) {
     selectedCategory.value = category;
-    query.value = category == 'All' ? '' : category;
+    if (category == 'All') {
+      query.value = '';
+      selectedColor.value = '';
+    } else {
+      final match = wallpaperCategories.firstWhereOrNull(
+        (entry) => entry.name == category,
+      );
+      query.value = match?.query ?? category;
+      selectedColor.value = match?.colorFilter ?? '';
+    }
+    selectedTab.value = 0;
+    return load();
+  }
+
+  Future<void> selectColor(String color) {
+    selectedColor.value = selectedColor.value == color ? '' : color;
+    selectedCategory.value = 'All';
+    query.value = '';
     selectedTab.value = 0;
     return load();
   }
@@ -58,7 +78,10 @@ class GalleryController extends GetxController {
     photos.clear();
     _page = 1;
     try {
-      final result = await repository.fetch(query: query.value);
+      final result = await repository.fetch(
+        query: query.value,
+        color: selectedColor.value,
+      );
       if (generation != _generation || isClosed) return;
       photos.assignAll(result.photos);
       hasMore.value = result.hasMore;
@@ -79,6 +102,7 @@ class GalleryController extends GetxController {
     try {
       final result = await repository.fetch(
         query: query.value,
+        color: selectedColor.value,
         page: _page + 1,
       );
       if (generation != _generation || isClosed) return;

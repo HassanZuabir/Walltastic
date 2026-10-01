@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../controllers/gallery_controller.dart';
 import '../models/wallpaper.dart';
@@ -13,6 +14,23 @@ import 'wallpaper_viewer_screen.dart';
 class WallpaperDetailScreen extends GetView<GalleryController> {
   const WallpaperDetailScreen({super.key, required this.photo});
   final Wallpaper photo;
+
+  Future<void> _share(BuildContext context) async {
+    final box = context.findRenderObject() as RenderBox?;
+    await SharePlus.instance.share(
+      ShareParams(
+        subject: 'Wallpaper found with Walltastic',
+        text:
+            '${photo.title.split(' · ').first}\n'
+            'Photo by ${photo.photographer} on Pexels\n'
+            '${photo.pageUrl}\n\n'
+            'Found with Walltastic',
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +75,12 @@ class WallpaperDetailScreen extends GetView<GalleryController> {
                         onPressed: () => Get.back<void>(),
                       ),
                       const Spacer(),
+                      RoundButton(
+                        icon: Icons.share_outlined,
+                        tooltip: 'Share wallpaper',
+                        onPressed: () => _share(context),
+                      ),
+                      const SizedBox(width: 10),
                       FavoriteButton(photo: photo),
                     ],
                   ),

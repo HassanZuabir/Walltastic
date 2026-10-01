@@ -329,6 +329,76 @@ class _GalleryScreenState extends State<GalleryScreen> {
           },
         ),
       ),
+      const SizedBox(height: 18),
+      Row(
+        children: [
+          Text(
+            'Browse by color',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const Spacer(),
+          if (controller.selectedColor.value.isNotEmpty)
+            TextButton(
+              onPressed: () =>
+                  controller.selectColor(controller.selectedColor.value),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Clear'),
+            ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      SizedBox(
+        height: 40,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: browseColors.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 10),
+          itemBuilder: (context, index) {
+            final color = browseColors[index];
+            final selected = controller.selectedColor.value == color.value;
+            final swatch = Color(color.swatch);
+            return Tooltip(
+              message: color.name,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => controller.selectColor(color.value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: swatch,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                      width: selected ? 3 : 1,
+                    ),
+                  ),
+                  child: selected
+                      ? Icon(
+                          Icons.check_rounded,
+                          size: 20,
+                          color: swatch.computeLuminance() > 0.5
+                              ? Colors.black87
+                              : Colors.white,
+                        )
+                      : null,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
       const SizedBox(height: 20),
     ],
   );
