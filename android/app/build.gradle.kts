@@ -45,6 +45,10 @@ android {
 
     buildTypes {
         release {
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             // Uses android/key.properties when present; falls back to debug
             // keys so `flutter run --release` still works locally.
             signingConfig = if (keystoreProperties.isNotEmpty()) {
