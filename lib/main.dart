@@ -10,8 +10,10 @@ import 'controllers/ads_controller.dart';
 import 'controllers/download_controller.dart';
 import 'controllers/gallery_controller.dart';
 import 'controllers/settings_controller.dart';
+import 'controllers/wallpaper_apply_controller.dart';
 import 'data/download_network_policy.dart';
 import 'data/favorites_store.dart';
+import 'data/wallpaper_apply_service.dart';
 import 'data/wallpaper_download_service.dart';
 import 'data/wallpaper_repository.dart';
 
@@ -20,6 +22,7 @@ Future<void> main() async {
   final preferences = await SharedPreferences.getInstance();
   final settings = Get.put(SettingsController(preferences), permanent: true);
   Get.put(AdsController(), permanent: true);
+  Get.put(WallpaperApplyController(WallpaperApplyService()), permanent: true);
   final connectivity = Connectivity();
   Get.put(
     DownloadController(

@@ -6,6 +6,7 @@ import '../models/wallpaper.dart';
 import '../theme/app_theme.dart';
 import '../widgets/download_button.dart';
 import '../widgets/gallery_widgets.dart';
+import '../widgets/set_wallpaper_button.dart';
 import '../widgets/wallpaper_image.dart';
 import 'wallpaper_viewer_screen.dart';
 
@@ -141,6 +142,8 @@ class WallpaperDetailScreen extends GetView<GalleryController> {
                                 ],
                               ),
                               const SizedBox(height: 26),
+                              SetWallpaperButton(photo: photo),
+                              const SizedBox(height: 10),
                               DownloadButton(photo: photo),
                               const SizedBox(height: 10),
                               SizedBox(
