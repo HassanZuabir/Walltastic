@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,149 +40,188 @@ class _GalleryScreenState extends State<GalleryScreen> {
     super.dispose();
   }
 
+  static const _headerHeight = 76.0;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      bottom: false,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            children: [
-              _Header(
-                onSettings: () {
-                  FocusScope.of(context).unfocus();
-                  Get.to<void>(() => const SettingsScreen());
-                },
-              ),
-              Obx(() {
-                if (controller.storageError.value.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    controller.storageError.value,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                );
-              }),
-              Expanded(
-                child: Obx(() {
-                  final tab = controller.selectedTab.value;
-                  return RefreshIndicator(
-                    onRefresh: tab == 0 ? controller.load : () async {},
-                    color: Theme.of(context).colorScheme.primary,
-                    child: CustomScrollView(
-                      key: PageStorageKey('gallery-$tab'),
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                          sliver: SliverToBoxAdapter(
-                            child: tab == 0
-                                ? _discoveryHeader(context)
-                                : _sectionHeader(context, tab),
-                          ),
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    final contentTop = topInset + _headerHeight;
+    return Scaffold(
+      body: Stack(
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                children: [
+                  Obx(() {
+                    if (controller.storageError.value.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(24, contentTop, 24, 0),
+                      child: Text(
+                        controller.storageError.value,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
                         ),
-                        if (tab == 1)
-                          const _CategoryGrid()
-                        else
-                          _PhotoGrid(saved: tab == 2),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                            child: Center(
-                              child: TextButton(
-                                onPressed: () => openExternalLink(
-                                  context,
-                                  'https://www.pexels.com',
+                      ),
+                    );
+                  }),
+                  Expanded(
+                    child: Obx(() {
+                      final tab = controller.selectedTab.value;
+                      return RefreshIndicator(
+                        onRefresh: tab == 0 ? controller.load : () async {},
+                        color: Theme.of(context).colorScheme.primary,
+                        edgeOffset: contentTop,
+                        child: CustomScrollView(
+                          key: PageStorageKey('gallery-$tab'),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverPadding(
+                              padding: EdgeInsets.fromLTRB(
+                                24,
+                                contentTop + 12,
+                                24,
+                                0,
+                              ),
+                              sliver: SliverToBoxAdapter(
+                                child: tab == 0
+                                    ? _discoveryHeader(context)
+                                    : _sectionHeader(context, tab),
+                              ),
+                            ),
+                            if (tab == 1)
+                              const _CategoryGrid()
+                            else
+                              _PhotoGrid(saved: tab == 2),
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  20,
+                                  24,
+                                  24,
                                 ),
-                                child: Text(
-                                  'Photography by the Pexels community ↗',
-                                  style: TextStyle(
-                                    color: Theme.of(
+                                child: Center(
+                                  child: TextButton(
+                                    onPressed: () => openExternalLink(
                                       context,
-                                    ).colorScheme.onSurfaceVariant,
-                                    fontSize: 12,
+                                      'https://www.pexels.com',
+                                    ),
+                                    child: Text(
+                                      'Photography by the Pexels community ↗',
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-    bottomNavigationBar: Obx(
-      () => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AdBanner(),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? Theme.of(context).colorScheme.outlineVariant
-                      : Theme.of(context).colorScheme.outline,
-                ),
+                      );
+                    }),
+                  ),
+                ],
               ),
             ),
-            child: NavigationBar(
-              selectedIndex: controller.selectedTab.value,
-              onDestinationSelected: (index) {
-                FocusScope.of(context).unfocus();
-                controller.selectedTab.value = index;
-              },
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              indicatorColor: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.15),
-              height: 76,
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.explore_outlined),
-                  selectedIcon: Icon(
-                    Icons.explore,
-                    color: Theme.of(context).colorScheme.primary,
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: Container(
+                  padding: EdgeInsets.only(top: topInset),
+                  color: Theme.of(
+                    context,
+                  ).scaffoldBackgroundColor.withValues(alpha: 0.65),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: _Header(
+                        onSettings: () {
+                          FocusScope.of(context).unfocus();
+                          Get.to<void>(() => const SettingsScreen());
+                        },
+                      ),
+                    ),
                   ),
-                  label: 'Discover',
                 ),
-                NavigationDestination(
-                  icon: const Icon(Icons.grid_view_rounded),
-                  selectedIcon: Icon(
-                    Icons.grid_view_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  label: 'Categories',
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.favorite_border_rounded),
-                  selectedIcon: Icon(
-                    Icons.favorite_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  label: 'Saved',
-                ),
-              ],
+              ),
             ),
           ),
         ],
       ),
-    ),
-  );
+      bottomNavigationBar: Obx(
+        () => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AdBanner(),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Theme.of(context).colorScheme.outlineVariant
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: controller.selectedTab.value,
+                onDestinationSelected: (index) {
+                  FocusScope.of(context).unfocus();
+                  controller.selectedTab.value = index;
+                },
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                indicatorColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.15),
+                height: 76,
+                destinations: [
+                  NavigationDestination(
+                    icon: const Icon(Icons.explore_outlined),
+                    selectedIcon: Icon(
+                      Icons.explore,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    label: 'Discover',
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.grid_view_rounded),
+                    selectedIcon: Icon(
+                      Icons.grid_view_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    label: 'Categories',
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.favorite_border_rounded),
+                    selectedIcon: Icon(
+                      Icons.favorite_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    label: 'Saved',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _discoveryHeader(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
